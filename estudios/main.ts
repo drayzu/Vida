@@ -35,6 +35,7 @@ import { fuera } from './fuera';
 import { volver } from './volver';
 import { cierre } from './cierre';
 import { OBRA } from './obra';
+import { hoy, capa } from './hoy';
 
 /**
  * Vida's phase-0 studies (`color` is plan v2, 14 Nov 2026; the rest are from plan v1). Copied from Abismo's study page. The page scroll
@@ -46,7 +47,7 @@ import { OBRA } from './obra';
  * `estudio.hoja('docs/estudios/x.jpg', [beats], cols, width)` saves a contact sheet.
  */
 
-const ESCENAS: Escena[] = [cierre, volver, fuera, lejos, nace, rastro, duelo, supo, sale, tu, frio, dentro, cruza, azul, perdida, color2, testigos, mundos, simulada, flotadores, color, latido, montaje, seishoras];
+const ESCENAS: Escena[] = [hoy, capa, cierre, volver, fuera, lejos, nace, rastro, duelo, supo, sale, tu, frio, dentro, cruza, azul, perdida, color2, testigos, mundos, simulada, flotadores, color, latido, montaje, seishoras];
 const PX_PER_BEAT = 520;
 
 const params = new URLSearchParams(location.search);
@@ -72,8 +73,9 @@ let inst: Instancia | null = null;
 let tramo = params.has('obra') ? clamp(Number(params.get('obra') || 1) - 1, 0, OBRA.length - 1) : -1;
 const enObra = () => tramo >= 0;
 if (enObra()) document.body.classList.add('is-obra');
-/** How long each stretch is, in beats (measured 15 Nov 2026; corrected when each one is mounted). */
-const largos: number[] = [37.4, 40, 18, 59, 30, 42, 45, 9, 18.5, 45, 17, 17, 24, 37.9, 40.5, 20.5, 38, 51.5, 17, 17, 17, 56, 32, 36, 34].slice(0, OBRA.length);
+/** How long each study is, in beats (measured; each stretch is corrected when it is mounted). */
+const LARGO: Record<string, number> = { hoy: 55.5, capa: 51, lejos: 37.9, simulada: 20.5, sale: 42, cruza: 38, nace: 51.5, mundos: 17, flotadores: 24, frio: 56, azul: 32 };
+const largos: number[] = OBRA.map((o) => Math.min(o.a ?? Infinity, LARGO[o.id] ?? 30) - (o.de ?? 0));
 /** Beats per second when it plays by itself. */
 let ritmo = enObra() ? 0.75 : 0.45;
 /** A black veil over the cut between two scenes (1: black). */
