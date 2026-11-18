@@ -35,7 +35,13 @@ import { fuera } from './fuera';
 import { volver } from './volver';
 import { cierre } from './cierre';
 import { OBRA } from './obra';
-import { hoy, capa } from './hoy';
+import { hoy, capa, vuelta } from './hoy';
+import { patron } from './patron';
+import { galaxia } from './galaxia';
+import { vacio } from './vacio';
+import { otro } from './otro';
+import { juntos } from './juntos';
+import { siente } from './siente';
 
 /**
  * Vida's phase-0 studies (`color` is plan v2, 14 Nov 2026; the rest are from plan v1). Copied from Abismo's study page. The page scroll
@@ -47,7 +53,7 @@ import { hoy, capa } from './hoy';
  * `estudio.hoja('docs/estudios/x.jpg', [beats], cols, width)` saves a contact sheet.
  */
 
-const ESCENAS: Escena[] = [hoy, capa, cierre, volver, fuera, lejos, nace, rastro, duelo, supo, sale, tu, frio, dentro, cruza, azul, perdida, color2, testigos, mundos, simulada, flotadores, color, latido, montaje, seishoras];
+const ESCENAS: Escena[] = [hoy, capa, patron, juntos, otro, galaxia, siente, vacio, vuelta, cierre, volver, fuera, lejos, nace, rastro, duelo, supo, sale, tu, frio, dentro, cruza, azul, perdida, color2, testigos, mundos, simulada, flotadores, color, latido, montaje, seishoras];
 const PX_PER_BEAT = 520;
 
 const params = new URLSearchParams(location.search);
@@ -74,7 +80,7 @@ let tramo = params.has('obra') ? clamp(Number(params.get('obra') || 1) - 1, 0, O
 const enObra = () => tramo >= 0;
 if (enObra()) document.body.classList.add('is-obra');
 /** How long each study is, in beats (measured; each stretch is corrected when it is mounted). */
-const LARGO: Record<string, number> = { hoy: 55.5, capa: 51, lejos: 37.9, simulada: 20.5, sale: 42, cruza: 38, nace: 51.5, mundos: 17, flotadores: 24, frio: 56, azul: 32 };
+const LARGO: Record<string, number> = { hoy: 55.5, capa: 51, lejos: 37.9, patron: 50, simulada: 20.5, sale: 42, cruza: 38, juntos: 42, nace: 51.5, mundos: 17, flotadores: 24, otro: 57, galaxia: 46, siente: 38, frio: 56, vacio: 52, azul: 32, vuelta: 46 };
 const largos: number[] = OBRA.map((o) => Math.min(o.a ?? Infinity, LARGO[o.id] ?? 30) - (o.de ?? 0));
 /** Beats per second when it plays by itself. */
 let ritmo = enObra() ? 0.75 : 0.45;

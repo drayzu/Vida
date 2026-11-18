@@ -32,14 +32,16 @@ import { C, CIUDAD, DC, GLOBO_MOVE, GLOBO_PRE, MAQ_MOVE, MAQ_PRE, R, ciudad, den
  */
 
 /** Your heartbeats, carried from «Hoy» into «No es para nosotros» when they play in a row. */
-let LATIDOS = 0;
-const BPM = 66;
+export let LATIDOS = 0;
+/** Lets a later scene carry the count on. */
+export const fijarLatidos = (n: number) => (LATIDOS = n);
+export const BPM = 66;
 
-const PALETA = [SERIE.mente, SERIE.abismo, SERIE.destino, SERIE.tiempo, SERIE.infinito, SERIE.espacio];
+export const PALETA = [SERIE.mente, SERIE.abismo, SERIE.destino, SERIE.tiempo, SERIE.infinito, SERIE.espacio];
 
 // ---------------------------------------------------------------- the heart
 
-function corazon() {
+export function corazon() {
   const b = materiaBuilder(1805);
   const r = b.r;
   const aN: number[] = [];
@@ -127,13 +129,13 @@ function corazon() {
   return { data: b.data(), aN: new Float32Array(aN), aQ: new Float32Array(aQ) };
 }
 
-const CORAZON_PRE = /* glsl */ `
+export const CORAZON_PRE = /* glsl */ `
   attribute vec3 aN;
   attribute vec4 aQ;
   uniform float uBpm;
   ${SEGURO}
 `;
-const CORAZON_MOVE = /* glsl */ `
+export const CORAZON_MOVE = /* glsl */ `
   float x = fract(uTime * uBpm / 60.0);
   float lub = lubdub(uTime, uBpm);
   float atr = lubdub(uTime + 0.13, uBpm);
@@ -153,7 +155,7 @@ const CORAZON_MOVE = /* glsl */ `
 // ---------------------------------------------------------------- people
 
 /** You (teal, at the origin) and the others around you, each a heart that sends a ring out on each beat. */
-function gente(otros: number) {
+export function gente(otros: number) {
   const b = materiaBuilder(1804);
   const r = b.r;
   const aQ: number[] = [];
@@ -183,11 +185,11 @@ function gente(otros: number) {
   return { data: b.data(), aQ: new Float32Array(aQ) };
 }
 
-const GENTE_PRE = /* glsl */ `
+export const GENTE_PRE = /* glsl */ `
   attribute vec4 aQ;
   uniform float uAnillo, uAnilloTu, uTu, uOtros, uAlt;
 `;
-const GENTE_MOVE = /* glsl */ `
+export const GENTE_MOVE = /* glsl */ `
   float ph = fract(uTime * aQ.x / 60.0 + aQ.y);
   bool tu = aQ.w > 0.5;
   if (tu) p.y += uAlt;
@@ -205,7 +207,7 @@ const GENTE_MOVE = /* glsl */ `
 
 // ---------------------------------------------------------------- sky
 
-function estrellas() {
+export function estrellas() {
   const b = materiaBuilder(1807);
   const r = b.r;
   for (let i = 0; i < 16000; i++) {
@@ -274,7 +276,7 @@ function sol(S: THREE.Vector3) {
 // ---------------------------------------------------------------- shared
 
 /** Places the camera at distance D from target T, at azimuth `az` and elevation `el`. */
-function camara(camera: THREE.PerspectiveCamera, T: THREE.Vector3, D: number, az: number, el: number) {
+export function camara(camera: THREE.PerspectiveCamera, T: THREE.Vector3, D: number, az: number, el: number) {
   const ce = Math.cos(el);
   camera.position.set(T.x + D * ce * Math.sin(az), T.y + D * Math.sin(el), T.z + D * ce * Math.cos(az));
   camera.up.set(0, 1, 0);
@@ -286,13 +288,13 @@ function camara(camera: THREE.PerspectiveCamera, T: THREE.Vector3, D: number, az
 }
 
 /** The planet hides what is behind it (only from far: near the ground it would hide nothing anyway). */
-function ocultar(nubes: (Nube | null)[], camera: THREE.PerspectiveCamera, D: number) {
+export function ocultar(nubes: (Nube | null)[], camera: THREE.PerspectiveCamera, D: number) {
   const c = C.clone().applyMatrix4(camera.matrixWorldInverse);
   for (const n of nubes) if (n) n.u.uOcc.value.set(c.x, c.y, c.z, D > 0 ? R * 0.995 : 0);
 }
 
 /** The clock at bottom left: a big number, its unit, and a line under it. */
-function reloj(g: CanvasRenderingContext2D, f: Frame, a: number, n: string, que: string, linea: string) {
+export function reloj(g: CanvasRenderingContext2D, f: Frame, a: number, n: string, que: string, linea: string) {
   if (a < 0.01) return;
   const u = f.u;
   const x = 44 * u;
@@ -316,7 +318,7 @@ function reloj(g: CanvasRenderingContext2D, f: Frame, a: number, n: string, que:
 }
 
 /** Your heartbeats since the scene started, counted on the beat the heart draws. */
-function contador(desde: number) {
+export function contador(desde: number) {
   let t0: number | null = null;
   return (time: number) => {
     if (t0 === null) t0 = time;
@@ -325,7 +327,7 @@ function contador(desde: number) {
 }
 
 /** Where the Sun is (from the planet's centre): behind it, seen from where the camera ends «La capa». */
-const SOL = V(-0.53, -0.84, 0.1).normalize();
+export const SOL = V(-0.53, -0.84, 0.1).normalize();
 
 // ---------------------------------------------------------------- «Hoy»
 
@@ -633,6 +635,131 @@ export const capa: Escena = {
           const [n, que] = anos(Math.pow(10, 3 + 6 * k));
           reloj(g2, f, luz * smoothstep(tl.at('ventana'), tl.at('ventana') + 1, p), n, que, 'Desde hoy · lo que le queda a la vida de la Tierra es aproximado');
         }
+      },
+      dispose() {
+        vivo = false;
+      },
+    };
+  },
+};
+
+// ---------------------------------------------------------------- «Tú» (the close)
+
+export const vuelta: Escena = {
+  id: 'vuelta',
+  nombre: 'Tú',
+  estilos: [{ key: '1', nombre: 'De vuelta · Ahora · Tú', nota: 'Desde lejos, de vuelta a la Tierra de noche, a la ciudad, a las luces blancas donde ya empezaron, a ti y a tu corazón. Al final solo queda tu punto, que late.' }],
+  montar(stage): Instancia {
+    const { root, camera } = stage;
+
+    const H = corazon();
+    const UC = { uBpm: { value: BPM } };
+    const cor = materia(H.data, { pre: CORAZON_PRE, move: CORAZON_MOVE, uniforms: UC, extra: { aN: [H.aN, 3], aQ: [H.aQ, 4] } });
+    const G = gente(4200);
+    const UG = { uAnillo: { value: 1 }, uAnilloTu: { value: 1 }, uTu: { value: 1 }, uOtros: { value: 1 }, uAlt: { value: 0 } };
+    const per = materia(G.data, { pre: GENTE_PRE, move: GENTE_MOVE, uniforms: UG, extra: { aQ: [G.aQ, 4] } });
+    const urb = materia(ciudad(), { move: /* glsl */ `fuente = 0.8;` });
+    const UM = { uDC: { value: DC.clone() }, uOla: { value: 1 }, uSync: { value: 1 }, uCerca: { value: 0 }, uBpm: { value: BPM } };
+    const maq = materia(maquinas(), { pre: MAQ_PRE + SEGURO, move: MAQ_MOVE, uniforms: UM });
+    const est = materia(estrellas(), { move: 'fuente = 1.0;' });
+    for (const n of [est, urb, maq, per, cor]) root.add(n.points);
+
+    const UGl = {
+      uS: { value: SOL.clone() }, uC: { value: C.clone() }, uDia: { value: 0 }, uLuces: { value: 1 }, uMaquinas: { value: 1.6 },
+      uNocheTierra: { value: 0.035 }, uAire: { value: 1 }, uEdad: { value: 0 }, uSolFuerte: { value: 0 }, uBrillo: { value: 1 },
+    };
+    let tierra: Nube | null = null;
+    let vivo = true;
+    const listo = mapa().then((m) => {
+      if (!vivo) return;
+      tierra = materia(globo(m, { superficie: 160_000, aire: 70_000 }), { pre: GLOBO_PRE, move: GLOBO_MOVE, uniforms: UGl });
+      root.add(tierra.points);
+    });
+
+    const tl = new Timeline({ luz: 0, cor: 1, solo: 0 });
+    tl.set({ ld: 8.25, az: 2.1, el: 1.2 });
+    tl.caption(8, 'De vuelta', 'Y aquí, ahora: una capa fina sobre un planeta pequeño, de noche.');
+    tl.with(2.5, { luz: 1 });
+    tl.to(8, { ld: 7.25, az: 1.6, el: 1.05 });
+    tl.label('empezaron');
+    tl.caption(9, 'Ya empezaron', 'Los que vienen ya están empezando. Aquí, junto a ti.');
+    tl.to(9, { ld: 3.7, az: 1.3, el: 0.92 });
+    tl.label('gente');
+    tl.caption(8, 'Esta noche', 'Esta noche, ocho mil millones de corazones laten sin que nadie les haya dicho para qué.');
+    tl.to(8, { ld: 0.9, az: 1.0, el: 0.62 });
+    tl.label('ahora');
+    tl.caption(9, 'Ahora', 'No sabemos qué es estar vivo.');
+    tl.to(9, { ld: -0.45, az: 0.45, el: 0.12 });
+    tl.label('tu');
+    tl.caption(12, 'Tú', 'Tú lo estás. Ahora.');
+    tl.with(6, { cor: 0, solo: 1 });
+    tl.to(12, { ld: 0.3, az: 0.3, el: 1.3 });
+
+    const T = V();
+    const contar = contador(LATIDOS);
+    let latidos = 1;
+    return {
+      tl,
+      listo,
+      escalera: false,
+      cuenta(): Cuenta | null {
+        return null;
+      },
+      rotulo(p): Rotulo | null {
+        const cp = tl.captionAt(p);
+        return cp ? { capitulo: 'Cierre · Tú', name: cp.name, fact: cp.fact } : null;
+      },
+      update(f: Frame) {
+        const g = (k: string) => tl.get(k, f.p);
+        const ld = g('ld');
+        const D = Math.pow(10, ld);
+        T.set(0, 0, 0).lerp(C, Math.min(smoothstep(6.3, 7.3, ld), (0.75 * D) / R));
+        camara(camera, T, D, g('az'), g('el'));
+        stage.bloom.strength = 0.5;
+        stage.bloom.radius = 0.6;
+        stage.bloom.threshold = 0.16;
+        const luz = g('luz');
+        const solo = g('solo');
+        latidos = contar(f.time);
+        LATIDOS = latidos;
+
+        enfocar(cor, f.focal, f.dpr, f.time);
+        cor.u.uGain.value = luz * 0.95 * (1 - smoothstep(0.2, 0.85, ld)) * g('cor');
+
+        enfocar(per, f.focal, f.dpr, f.time);
+        per.u.uGain.value = luz * (1 - smoothstep(4.5, 5.3, ld));
+        UG.uAnillo.value = clamp(D * 0.03, 0.02, 18);
+        UG.uAnilloTu.value = clamp(D * (0.035 + 0.25 * solo), 0.02, 90);
+        UG.uTu.value = Math.max(smoothstep(0.35, 0.8, ld) * (1 + 4 * smoothstep(3.0, 3.6, ld)), 0.9 * solo);
+        per.u.uMaxPx.value = (24 - 16 * solo) * f.dpr;
+        UG.uOtros.value = smoothstep(0.7, 1.7, ld) * (1 - smoothstep(2.6, 3.2, ld));
+
+        enfocar(urb, f.focal, f.dpr, f.time);
+        urb.u.uMinPx.value = 1.3 * f.dpr;
+        urb.u.uMaxPx.value = 10 * f.dpr;
+        urb.u.uGain.value = luz * 0.75 * smoothstep(0.9, 2.3, ld) * (1 - smoothstep(5.7, 6.4, ld)) * (1 - 0.92 * smoothstep(3.8, 5.2, ld));
+
+        enfocar(maq, f.focal, f.dpr, f.time);
+        maq.u.uMaxPx.value = 12 * f.dpr;
+        maq.u.uGain.value = luz * (1 - smoothstep(5.0, 5.8, ld)) * smoothstep(1.0, 2.0, ld);
+
+        enfocar(est, f.focal, f.dpr, f.time);
+        est.u.uMinPx.value = 1.2 * f.dpr;
+        est.u.uMaxPx.value = 3 * f.dpr;
+        est.u.uGain.value = luz * 0.8 * smoothstep(4.8, 6.0, ld);
+
+        if (tierra) {
+          enfocar(tierra, f.focal, f.dpr, f.time);
+          tierra.u.uMinPx.value = 1.2 * f.dpr;
+          tierra.u.uMaxPx.value = 4 * f.dpr;
+          tierra.u.uGain.value = luz * smoothstep(4.6, 5.6, ld);
+        }
+        ocultar([est, urb, maq, per, tierra], camera, D);
+      },
+      placa(g2, f) {
+        const a = tl.get('luz', f.p) * smoothstep(0.6, 1.8, f.p);
+        const linea = f.p < tl.at('gente') ? 'La Tierra de noche · hoy' : f.p < tl.at('ahora') ? 'Uno entre ocho mil millones' : f.p < tl.at('tu') ? 'Tu corazón' : 'Ahora';
+        reloj(g2, f, a, grupo(latidos), latidos === 1 ? 'latido' : 'latidos', linea);
       },
       dispose() {
         vivo = false;

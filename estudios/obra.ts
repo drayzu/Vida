@@ -3,8 +3,8 @@
  * (and which way, and which beats of it) stands for each moment. `?obra` plays them one after
  * another, with a cut between them.
  *
- * It is a rough cut: the moments that have no study yet are missing (listed in `FALTAN`), and the
- * passages between scenes are cuts. The cut of «De forma en forma» is kept in `OBRA_FORMAS`.
+ * It is a rough cut: two moments still have no study (listed in `FALTAN`), and the passages
+ * between scenes are cuts. The cut of «De forma en forma» is kept in `OBRA_FORMAS`.
  */
 
 export interface Tramo {
@@ -27,25 +27,33 @@ const I = 'I · No es para nosotros';
 const II = 'II · Lo que vive';
 const III = 'III · Cómo vivirían';
 const IV = 'IV · El vacío';
+const CIERRE = 'Cierre · Tú';
 
 export const OBRA: Tramo[] = [
   { n: '1–3', nombre: 'Un latido · La Tierra de noche · Lo que estamos haciendo', parte: APERTURA, id: 'hoy' },
   { n: '4–6', nombre: 'Quince segundos · La capa · La ventana', parte: I, id: 'capa' },
   { n: '7', nombre: 'Lejos', parte: I, id: 'lejos' },
-  { n: '10', nombre: 'Otro patrón', parte: II, id: 'simulada', estilo: 0, ojo: 'Faltan antes «No eres tu materia» y «Un patrón» (8–9).' },
+  { n: '8–9', nombre: 'No eres tu materia · Un patrón', parte: II, id: 'patron' },
+  { n: '10', nombre: 'Otro patrón', parte: II, id: 'simulada', estilo: 0 },
   { n: '11', nombre: 'Salir · la Tierra', parte: III, id: 'sale' },
   { n: '12', nombre: 'Salir · ellos', parte: III, id: 'cruza', ojo: 'Provisional: son líquenes, todavía no cuerpos que salen al vacío.' },
-  { n: '14', nombre: 'Juntos · ellos', parte: III, id: 'nace', de: 36.5, ojo: 'Falta antes «Juntos · la Tierra» (13, el sifonóforo). Es el final de «Nace».' },
+  { n: '13', nombre: 'Juntos · la Tierra', parte: III, id: 'juntos' },
+  { n: '14', nombre: 'Juntos · ellos', parte: III, id: 'nace', de: 36.5, ojo: 'Es el final de «Nace».' },
   { n: '16', nombre: 'Sus mundos · el agua sube', parte: III, id: 'mundos', estilo: 0, ojo: 'Falta antes «Sus mundos · la Tierra» (15, el color que pinta el cerebro).' },
   { n: '16', nombre: 'Sus mundos · tres soles', parte: III, id: 'mundos', estilo: 1 },
   { n: '16', nombre: 'Sus mundos · el mar de luz', parte: III, id: 'mundos', estilo: 2 },
   { n: '17', nombre: 'Lo que vive en sus mundos', parte: III, id: 'flotadores', estilo: 2 },
-  { n: '21', nombre: 'Esperar · ellos', parte: III, id: 'frio', ojo: 'Faltan antes «Otro tiempo» (18–19) y «Esperar · la Tierra» (20).' },
-  { n: '26', nombre: 'Quizá nos vuelvan a hacer', parte: IV, id: 'azul', ojo: 'Faltan antes «¿Siente?» (22) y el vacío (23–25). Después falta el cierre (27–29).' },
+  { n: '18–19', nombre: 'Otro tiempo · tres corazones · diez días', parte: III, id: 'otro' },
+  { n: '19', nombre: 'Otro tiempo · un pensamiento', parte: III, id: 'galaxia' },
+  { n: '21', nombre: 'Esperar · ellos', parte: III, id: 'frio', ojo: 'Falta antes «Esperar · la Tierra» (20, el tardígrado).' },
+  { n: '22', nombre: '¿Siente?', parte: III, id: 'siente' },
+  { n: '23–25', nombre: 'Todas partes · Nadie contesta · La pregunta', parte: IV, id: 'vacio' },
+  { n: '26', nombre: 'Quizá nos vuelvan a hacer', parte: IV, id: 'azul' },
+  { n: '27–29', nombre: 'De vuelta · Ahora · Tú', parte: CIERRE, id: 'vuelta' },
 ];
 
 /** Moments of GUION-vienen.md that have no study yet. */
-export const FALTAN = ['8–9 No eres tu materia · Un patrón', '13 Juntos · la Tierra', '15 Sus mundos · la Tierra', '18–19 Otro tiempo', '20 Esperar · la Tierra', '22 ¿Siente?', '23–25 El vacío', '27–29 Cierre · Tú'];
+export const FALTAN = ['15 Sus mundos · la Tierra', '20 Esperar · la Tierra'];
 
 /** The rough cut of GUION-formas.md («De forma en forma», 15 Nov 2026), kept for reference. */
 export const OBRA_FORMAS: Tramo[] = [
